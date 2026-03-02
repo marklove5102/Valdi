@@ -46,6 +46,17 @@ export function protectNativeRefsForCurrentContextId(): () => void {
 }
 
 /**
+ * By default, bridged objects from native are disposed after onDestroy()
+ * is called on the root component. If you need a bridged object to last the
+ * lifetime of a Promise's resolution, use this function to keep the current
+ * context alive until the promise is resolved or rejected.
+ */
+export function asyncWithProtectedRefsForCurrentContextId<T>(promise: Promise<T>): Promise<T> {
+  const dispose = protectNativeRefsForCurrentContextId();
+  return promise.finally(() => dispose());
+}
+
+/**
  * Evaluate the given block with a global native refs scope.
  * Any native references emitted while the block is evaluated
  * will be associated with the global native references, which
