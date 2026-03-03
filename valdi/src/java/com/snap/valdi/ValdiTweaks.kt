@@ -34,4 +34,5 @@ data class ValdiTweaks(
          */
          val enableHardwareLayerWorkaround: Boolean = false,
          val maxViewOperationsProcessingTimeMs: Int = 0,
+         val disableHitTestSyncDeadline: Boolean = false,
 )
