@@ -53,12 +53,12 @@ open class ValdiRootView: ValdiView, Disposable {
     var useNewMultiTouchExperience = false
 
     // Implements fixes when using onRotate.
-    // enableMultiTouchFixes must also be enabled for this to work correctly.
     var enableRotateGestureRecognizeV2 = false
 
     // Implements fixes when using onPinch.
-    // enableMultiTouchFixes must also be enabled for this to work correctly.
     var enablePinchGestureRecognizeV2 = false
+
+    var enableV2GestureDetectorReset = false
 
     var disableLeakTracking = false
 
