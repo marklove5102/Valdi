@@ -340,6 +340,11 @@ class ValdiCompilerRunner {
         if regenerateValdiModulesBuildFilesOnly {
             // Even in regenerate mode, we need annotation processing to detect native exports for correct output file generation
             // However, we skip type checking since generated files (res, Strings, etc.) may not exist
+
+            // .vue files must be parsed and their scripts extracted so that TypeScript files
+            // importing from .vue modules can resolve those imports during symbol dumping.
+            builder.append(processor: ParseDocumentsProcessor(logger: logger, globalIosImportPrefix: configs.projectConfig.iosDefaultModuleNamePrefix))
+            builder.append(processor: DocumentUserScriptExtractionProcessor(logger: logger, fileManager: fileManager, userScriptManager: userScriptManager, projectConfig: configs.projectConfig))
             builder.append(processor: DumpTypeScriptSymbolsProcessor(logger: logger, typeScriptCompilerManager: typeScriptCompilerManager, compilerConfig: configs.compilerConfig, skipTypeChecking: true))
             builder.append(processor: ParseTypeScriptAnnotationsProcessor(logger: logger,
                                                                           projectClassMappingManager: projectClassMappingManager,
