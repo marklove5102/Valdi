@@ -15,6 +15,7 @@
 #include "valdi_core/cpp/Utils/ResolvablePromise.hpp"
 #include "valdi_core/cpp/Utils/SmallVector.hpp"
 #include "valdi_core/cpp/Utils/Trace.hpp"
+#include "valdi_core/cpp/Utils/Value.hpp"
 
 #include <future>
 
@@ -246,6 +247,15 @@ Value ValueFunctionWithJSValue::callPromise(const Ref<JavaScriptTaskScheduler>& 
             Value result = self->doJsCall(jsEntry, parameters.data(), parameters.size(), nullptr, false);
             if (!jsEntry.exceptionTracker) {
                 promise->fulfill(jsEntry.exceptionTracker.extractError());
+                return;
+            }
+
+            // When an interruptible callback is skipped (Valdi context destroyed), doJsCall returns
+            // undefined. Fulfilling the promise with undefined would cause native unmarshalling to
+            // fail (e.g. expected NativeSnapDoc). Reject the promise so the caller can handle it.
+            if (result.getType() == ValueType::Undefined && self->_ignoreIfValdiContextIsDestroyed &&
+                self->getContext() != nullptr && self->getContext()->isDestroyed()) {
+                promise->fulfill(Result<Value>(Error("Valdi context destroyed")));
                 return;
             }
 
