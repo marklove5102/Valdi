@@ -95,6 +95,10 @@ public:
         return config.getMapValue(key).toFloat();
     }
 
+    int32_t getInt(const StringBox& key, int32_t fallback) override {
+        return config.getMapValue(key).toInt();
+    }
+
     Value getBinary(const StringBox& key, const Value& fallback) override {
         return config.getMapValue(key);
     }
@@ -6767,8 +6771,7 @@ TEST_P(RuntimeFixture, scopeNameAppearsInDisposedReferenceError) {
     Ref<MyNativeObject> nativeObject = makeShared<MyNativeObject>();
 
     // Create objectsManager with a specific scopeName
-    auto objectsManager =
-        wrapper.runtime->getJavaScriptRuntime()->createNativeObjectsManager("MyFeature.MyCallsite");
+    auto objectsManager = wrapper.runtime->getJavaScriptRuntime()->createNativeObjectsManager("MyFeature.MyCallsite");
 
     // Wrap native object in JS
     auto jsResult =

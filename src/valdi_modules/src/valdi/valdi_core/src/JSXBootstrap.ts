@@ -316,10 +316,12 @@ class JSXModule implements IDaemonClientManagerListener, RendererFactory {
   }
 
   makeRendererWithAllowedRootElementTypes(allowedRootElementTypes: string[] | undefined, treeId: string): Renderer {
+    const useTopDownMoveOrder = typeof runtime.useTopDownMoveOrder === 'boolean' ? runtime.useTopDownMoveOrder : false;
     return new Renderer(
       treeId,
       allowedRootElementTypes,
       new JSXRendererDelegate(treeId, this.stringCache, this.attributeCache, this.injectedAttributeCache),
+      useTopDownMoveOrder,
     );
   }
 

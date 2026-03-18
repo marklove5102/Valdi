@@ -121,4 +121,10 @@ bool ValdiRuntimeTweaks::disableHitTestSyncDeadline() const {
     return getConfigKey("VALDI_DISABLE_HIT_TEST_SYNC_DEADLINE");
 }
 
+bool ValdiRuntimeTweaks::useTopDownMoveOrder() const {
+    auto configKey =
+        StringCache::getGlobal().makeStringFromLiteral(std::string_view("VALDI_MAX_VIEW_OPERATIONS_PROCESSING_TIME"));
+    return _tweakValueProvider->getInt(configKey, 0) > 0;
+}
+
 } // namespace Valdi

@@ -2276,6 +2276,15 @@ void JavaScriptRuntime::buildContext(Valdi::IJavaScriptContext& context,
         return;
     }
 
+    // Gate top-down move order behind VALDI_MAX_VIEW_OPERATIONS_PROCESSING_TIME (same as view-op throttling).
+    bool useTopDownMoveOrder = tweaks != nullptr && tweaks->useTopDownMoveOrder();
+    auto jsUseTopDownMoveOrder = context.newBool(useTopDownMoveOrder);
+    context.setObjectProperty(
+        runtimeObject.get(), "useTopDownMoveOrder", jsUseTopDownMoveOrder.get(), exceptionTracker);
+    if (!exceptionTracker) {
+        return;
+    }
+
     std::string_view moduleLoaderTypeStr =
         (tweaks != nullptr && tweaks->enableCommonJsModuleLoader()) ? "commonjs" : "valdi";
 
