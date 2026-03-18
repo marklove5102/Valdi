@@ -1647,6 +1647,15 @@ export interface ScrollView extends _ScrollView, CommonView, ContainerTemplateEl
   cancelsTouchesOnScroll?: boolean;
 
   /**
+   * [iOS-Only]
+   * When enabled, any touch on the scroll view will immediately stop an ongoing
+   * deceleration animation so that the touch is delivered to content views
+   * instead of being consumed by the scroll view.
+   * @default: false
+   */
+  stopScrollingOnTouch?: boolean;
+
+  /**
    * If the keyboard is open, close it when we start scrolling
    * @default: false
    */
