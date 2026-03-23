@@ -62,6 +62,21 @@ valdi install ios  # or android
 - [API Reference](./docs/api/api-quick-reference.md)
 - [Frequently Asked Questions](./docs/docs/faq.md)
 - [Component Library](https://github.com/Snapchat/Valdi_Widgets)
+- [GitHub Discussions](https://github.com/Snapchat/Valdi/discussions)
+- [Roadmap](./ROADMAP.md)
+
+## Example Apps
+
+The [`apps/`](./apps) directory contains runnable examples:
+
+| App | What it shows |
+|-----|---------------|
+| [helloworld](./apps/helloworld) | Minimal component — the fastest way to get something on screen |
+| [navigation_example](./apps/navigation_example) | Screen navigation patterns |
+| [managed_context_example](./apps/managed_context_example) | Sharing state across components with managed context |
+| [valdi_gpt](./apps/valdi_gpt) | AI-driven dynamic UI — Valdi rendering UI described at runtime |
+| [cli_example](./apps/cli_example) | Building a Valdi CLI application |
+| [benchmark](./apps/benchmark) | Performance benchmarks |
 
 ## Why Choose Valdi?
 
@@ -120,7 +135,8 @@ Valdi generates type-safe bindings between TypeScript and native platforms:
 
 ## Need Help?
 
-Join our [Discord](https://discord.gg/uJyNEeYX2U) for support.
+- **[GitHub Discussions](https://github.com/Snapchat/Valdi/discussions)** — ask questions, share what you're building, report issues
+- **[Discord](https://discord.gg/uJyNEeYX2U)** — real-time chat with the community
 
 ## Contributing
 
