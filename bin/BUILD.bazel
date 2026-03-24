@@ -1,8 +1,11 @@
+load("@aspect_rules_js//js:defs.bzl", "js_binary")
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 load(
     "@valdi//bzl:prebuilt_tools.bzl",
+    "bundle_js",
     "pngquant_linux",
     "pngquant_macos",
+    "valdi_compiler_companion_files",
 )
 
 filegroup(
@@ -45,4 +48,21 @@ alias(
     name = "valdi_standalone",
     actual = "@valdi//valdi:valdi_standalone",
     visibility = ["//visibility:public"],
+)
+
+js_binary(
+    name = "valdi_compiler_companion",
+    copy_data_to_bin = False,
+    data = valdi_compiler_companion_files(),
+    entry_point = bundle_js(),
+    env = {
+        "NODE_ENV": "production",
+    },
+    node_options = [
+        # "--inspect-brk", # allows you to debug the companion using chrome://inspect in Chrome
+        "--max-old-space-size=4096",
+        "--enable-source-maps",
+    ],
+    visibility = ["//visibility:public"],
+    # log_level = "debug", # increase verbosity of logs if you need to debug anything
 )

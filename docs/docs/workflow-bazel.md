@@ -84,20 +84,19 @@ The `out/` directory is gitignored so your local binary is never committed.
 
 ### Using a locally built companion
 
-The toolchain uses the **source-built companion** by default (`//compiler/companion:ts_bin_wrapper`), so any changes to the TypeScript source in `compiler/companion/src/` are automatically picked up by Bazel on the next build — no manual build step required.
+The toolchain already uses the **source-built companion** by default (`use_prebuilt_companion` is false), so the companion is built from `compiler/companion` (e.g. webpack output). To avoid Bazel overwriting your npm-built companion output:
 
-The active companion target is controlled by the `compiler_companion` label flag:
+1. Build the companion in dev mode (writes to `dist_dev/` instead of `dist/`):
+   ```sh
+   cd compiler/companion && npm run build-dev
+   ```
 
-```
---@valdi//bzl/valdi:compiler_companion=<target>
-```
+2. Build or run Valdi with the dev-mode companion:
+   ```sh
+   bazel build //src/valdi_modules/src/valdi/jasmine --//compiler/companion:dev_mode=true
+   ```
 
-Consumer workspaces override this flag in their `.bazelrc` to use a prebuilt companion target with hermetic Node. To test changes to the companion from within one of those workspaces, override the flag on the command line:
-
-```sh
-bazel build //src/valdi_modules/src/valdi/jasmine \
-  --@valdi//bzl/valdi:compiler_companion=@valdi//compiler/companion:ts_bin_wrapper
-```
+Bazel will use `dist_dev/bundle.js` and will not overwrite your `dist/` folder.
 
 ## Known issues and limitations
 

@@ -238,6 +238,19 @@ selects.config_setting_combinations(
 # Toolchain for compiling Bazel modules.
 toolchain_type(name = "toolchain_type")
 
+# Flag to control whether to use prebuilt companion binary or build from source
+bool_flag(
+    name = "use_prebuilt_companion",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "use_prebuilt_companion_enabled",
+    flag_values = {
+        ":use_prebuilt_companion": "true",
+    },
+)
+
 # Flag to use a locally built compiler binary instead of the prebuilt from the toolchain.
 # Build the compiler with: compiler/compiler/scripts/update_compiler.sh -o compiler/compiler/out
 # Then build with: --//bzl/valdi:use_local_compiler=true
@@ -254,18 +267,13 @@ config_setting(
     },
 )
 
-# Label flag so the client workspace can inject a different companion target.
-# Defaults to the open-source ts_bin_wrapper (hermetic node, builds from source).
-# Override via .bazelrc: --@valdi//bzl/valdi:compiler_companion=<target>
-label_flag(
-    name = "compiler_companion",
-    build_setting_default = "//compiler/companion:ts_bin_wrapper",
-    visibility = ["//visibility:public"],
-)
-
+# Alias to choose between prebuilt binary and source-built companion
 alias(
     name = "compiler_companion_source",
-    actual = ":compiler_companion",
+    actual = select({
+        ":use_prebuilt_companion_enabled": "@valdi_toolchain//:valdi_compiler_companion",
+        "//conditions:default": "//compiler/companion:ts_bin_wrapper",
+    }),
     visibility = ["//visibility:public"],
 )
 

@@ -155,7 +155,7 @@ js_binary(
     },
     node_options = [
         # "--inspect-brk", # allows you to debug the companion using chrome://inspect in Chrome
-        "--max-old-space-size=8000",
+        "--max-old-space-size=4096",
         "--enable-source-maps",
         "--v8-pool-size=1",
     ],
