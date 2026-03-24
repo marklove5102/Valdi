@@ -18,11 +18,13 @@ namespace Valdi {
 DefaultAttributes::DefaultAttributes(YGConfig* yogaConfig, AttributeIds& attributeIds, float pointScale)
     : _attributeIds(attributeIds),
       _yogaAttributes(Valdi::makeShared<YogaAttributes>(yogaConfig, attributeIds, pointScale)),
-      _accessibilityAttributes(Valdi::makeShared<AccessibilityAttributes>(attributeIds)) {}
+      _accessibilityAttributes(Valdi::makeShared<AccessibilityAttributes>(attributeIds)),
+      _scrollAnchorAttributes(Valdi::makeShared<ScrollAnchorAttributes>(attributeIds)) {}
 
 void DefaultAttributes::bind(AttributeHandlerById& attributes) {
     _yogaAttributes->bind(attributes);
     _accessibilityAttributes->bind(attributes);
+    _scrollAnchorAttributes->bind(attributes);
 
     AttributesBinderHelper binder(_attributeIds, attributes);
 

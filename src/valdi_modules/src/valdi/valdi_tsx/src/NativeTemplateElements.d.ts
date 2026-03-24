@@ -76,6 +76,16 @@ interface LayoutAttributes {
   lazyLayout?: boolean;
 
   /**
+   * @experimental This feature is experimental and may change in future releases.
+   *
+   * Scroll anchor position for this element within the nearest parent scroll view.
+   * When set to 'top' or 'bottom', the parent scroll view (with maintainScrollAnchor={true})
+   * will pin this element to the specified viewport edge during layout.
+   * @default: 'none'
+   */
+  scrollAnchorPosition?: ScrollAnchorPosition;
+
+  /**
    * If set, the node will be set as a lazyLayout, and the given measure callback
    * will be called whenever the node needs to be measured. The callback
    * should return a MeasuredSize tuple representing how big the node should be.
@@ -1857,6 +1867,16 @@ export interface ScrollViewInteractive extends ScrollView {
    * Setting this value will skip waiting for the measure step and allow operations such as scrolling to occurr faster.
    */
   staticContentHeight?: number;
+
+  /**
+   * @experimental This feature is experimental and may change in future releases.
+   *
+   * When enabled, the scroll view will look for a descendant with scrollAnchorPosition set to
+   * 'top' or 'bottom' and pin it to the specified viewport edge during layout.
+   * Toggle this on when pagination triggers and off after layout settles.
+   * @default: false
+   */
+  maintainScrollAnchor?: boolean;
 }
 
 // @NativeTemplateElement({ios: 'SCValdiSpinnerView', android: 'com.snap.valdi.views.ValiSpinnerView', jsx: 'spinner'})
@@ -2108,6 +2128,8 @@ type LayoutJustifyContentProperty =
   | 'space-evenly';
 
 type LayoutFlexBasisProperty = CSSValue;
+
+export type ScrollAnchorPosition = 'none' | 'top' | 'bottom';
 
 export type LayoutAccessibilityCategory =
   | 'auto'

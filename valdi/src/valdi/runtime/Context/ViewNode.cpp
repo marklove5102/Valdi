@@ -10,6 +10,7 @@
 #include "valdi/runtime/Attributes/Yoga/Yoga.hpp"
 #include "valdi/runtime/CSS/CSSAttributesManager.hpp"
 #include "valdi/runtime/Context/IViewNodeAssetHandler.hpp"
+#include "valdi/runtime/Context/ScrollAnchorPosition.hpp"
 #include "valdi/runtime/Context/ViewManagerContext.hpp"
 #include "valdi/runtime/Context/ViewNodeAccessibilityState.hpp"
 #include "valdi/runtime/Context/ViewNodeChildrenIndexer.hpp"
@@ -1252,7 +1253,8 @@ void ViewNode::setViewFactory(ViewTransactionScope& viewTransactionScope, const 
             setIsLayout(viewFactory->getViewClassName() == AttributesManager::getLayoutPlaceholderClassName());
             auto boundAttributes = viewFactory->getBoundAttributes();
             _attributesApplier.setBoundAttributes(boundAttributes);
-            _flags[kScrollAttributesBound] = (boundAttributes != nullptr && boundAttributes->isBackingClassScrollable());
+            _flags[kScrollAttributesBound] =
+                (boundAttributes != nullptr && boundAttributes->isBackingClassScrollable());
 
             if (_flags[kScrollAttributesBound]) {
                 getYogaNodeForInsertingChildren()->getStyle().overflow() = YGOverflowScroll;
@@ -2318,6 +2320,60 @@ void ViewNode::updateScrollState() {
     auto updateResult = scrollState.updateContentSizeAndRtlOffset(
         Size(highestWidth, highestHeight), _calculatedFrame.size(), rtlOffsetX, getPointScale(), isHorizontal());
 
+    // Scroll anchor: find a descendant with scrollAnchorPosition != 0 and pin the scroll
+    // offset so it appears at the specified viewport edge. Only active when maintainScrollAnchor is true.
+    if (scrollState.getMaintainScrollAnchor()) {
+        float viewportH = _calculatedFrame.height;
+
+        // Find the child with scrollAnchorPosition != 0
+        std::function<ViewNode*(ViewNode*, int)> findAnchor = [&](ViewNode* node, int depth) -> ViewNode* {
+            if (depth <= 0)
+                return nullptr;
+            for (auto* child : *node) {
+                if (child->getScrollAnchorPosition() != ScrollAnchorPositionNone)
+                    return child;
+                auto* found = findAnchor(child, depth - 1);
+                if (found)
+                    return found;
+            }
+            return nullptr;
+        };
+        auto* anchorNode = findAnchor(this, 5);
+
+        if (anchorNode) {
+            int anchorPosition = anchorNode->getScrollAnchorPosition();
+
+            // Compute anchor's Y relative to this scroll node
+            float anchorY = sanitizeYogaValue(YGNodeLayoutGetTop(anchorNode->getYogaNode()));
+            for (auto* parent = anchorNode->getParent().get(); parent != nullptr && parent != this;
+                 parent = parent->getParent().get()) {
+                anchorY += sanitizeYogaValue(YGNodeLayoutGetTop(parent->getYogaNode()));
+            }
+
+            // Pin anchor to the specified viewport edge
+            float currentOffset = scrollState.getDirectionAgnosticContentOffset().y;
+            float targetOffset;
+            if (anchorPosition == ScrollAnchorPositionTop) {
+                targetOffset = anchorY;
+            } else {
+                targetOffset = anchorY - viewportH;
+            }
+
+            // Clamp to [0, maxScroll]
+            float maxScroll = std::max(highestHeight - viewportH, 0.0f);
+            targetOffset = std::max(0.0f, std::min(targetOffset, maxScroll));
+
+            float deltaY = targetOffset - currentOffset;
+            if (std::abs(deltaY) > 0.5f) {
+                auto currentContentOffset = scrollState.getDirectionAgnosticContentOffset();
+                currentContentOffset.y += deltaY;
+                scrollState.updateDirectionAgnosticContentOffset(currentContentOffset, currentContentOffset);
+                updateResult.changed = true;
+                scrollState.setNeedsSyncWithView(true);
+            }
+        }
+    }
+
     if (updateResult.changed) {
         setCalculatedViewportNeedsUpdate();
 
@@ -2976,6 +3032,19 @@ void ViewNode::setScrollStaticContentHeight(float staticContentHeight) {
         scrollState.setStaticContentHeight(staticContentHeight);
         scrollState.setNeedsSyncWithView(true);
     }
+}
+
+void ViewNode::setScrollAnchorPosition(int position) {
+    _scrollAnchorPosition = position;
+}
+
+int ViewNode::getScrollAnchorPosition() const {
+    return _scrollAnchorPosition;
+}
+
+void ViewNode::setMaintainScrollAnchor(bool maintain) {
+    auto& scrollState = getOrCreateScrollState();
+    scrollState.setMaintainScrollAnchor(maintain);
 }
 
 template<typename F>
