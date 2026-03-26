@@ -7,11 +7,11 @@
 #import "valdi/standalone_desktop/ValdiDesktopModuleInit.h"
 #import "valdi/macos/SCValdiRuntime.h"
 
-void SCValdiNativeModulesRegister(SCValdiRuntime* runtime) {
+__attribute__((weak)) void SCValdiNativeModulesRegister(SCValdiRuntime* runtime) {
     (void)runtime;
-    // Hook for desktop app to register additional native modules. SCValdiRuntime already
-    // registers device, application, strings in its init. No-op here; ValdiRunDesktopModuleInits
-    // is called after this from AppDelegate.
+    // Weak default no-op hook for desktop app to register additional native modules.
+    // Overridden by the host app (e.g. composer_snap_modules/SnapModules.mm) which
+    // provides a strong definition that registers native module factories.
 }
 
 static SCValdiDesktopComponentContextProvider g_desktopComponentContextProvider;
